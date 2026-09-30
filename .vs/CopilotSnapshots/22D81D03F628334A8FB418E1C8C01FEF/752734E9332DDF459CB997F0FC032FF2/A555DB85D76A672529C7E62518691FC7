@@ -1,0 +1,30 @@
+﻿"""Configuration defaults for the RAG system.
+
+This module centralizes tunable parameters like model name, chunk size, and embedding settings.
+"""
+import os
+
+
+class Config:
+	def __init__(self):
+		# Model settings (placeholder — change to your Ollama model name or LLM endpoint)
+		self.model_name = os.getenv("OLLAMA_MODEL", "ollama-local-model")
+		self.ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
+
+		# Document chunking / embedding settings
+		self.chunk_size = int(os.getenv("CHUNK_SIZE", "500"))
+		self.chunk_overlap = int(os.getenv("CHUNK_OVERLAP", "50"))
+
+		# Retrieval settings
+		self.faiss_index_path = os.getenv("FAISS_INDEX_PATH", "./faiss_index")
+		self.k_retrieval = int(os.getenv("K_RETRIEVAL", "5"))
+
+	def as_dict(self):
+		return {
+			"model_name": self.model_name,
+			"ollama_url": self.ollama_url,
+			"chunk_size": self.chunk_size,
+			"chunk_overlap": self.chunk_overlap,
+			"faiss_index_path": self.faiss_index_path,
+			"k_retrieval": self.k_retrieval,
+		}

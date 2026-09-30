@@ -1,0 +1,64 @@
+﻿"""Database utilities for chat history and metadata storage.
+
+This module uses pyodbc to connect to a SQL Server instance. It provides a
+small Database class with methods to save and retrieve chat history. Adjust
+SQL schema and error handling to your production needs.
+"""
+import os
+import pyodbc
+from datetime import datetime
+
+
+class Database:
+	def __init__(self, conn_str: str = None):
+		# Use env var if conn_str not provided
+		self.conn_str = conn_str or os.getenv("DATABASE_CONN_STRING")
+		if not self.conn_str:
+			raise ValueError("DATABASE_CONN_STRING not set in environment")
+
+	def _get_connection(self):
+		return pyodbc.connect(self.conn_str, autocommit=True)
+
+	def ensure_tables(self):
+		"""Ensure the chat history table exists."""
+		create_sql = (
+			"""
+			IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='chat_history' AND xtype='U')
+			CREATE TABLE chat_history (
+				id BIGINT IDENTITY(1,1) PRIMARY KEY,
+				user_query NVARCHAR(MAX),
+				assistant_response NVARCHAR(MAX),
+				created_at DATETIME2
+			)
+			"""
+		)
+		with self._get_connection() as conn:
+			cursor = conn.cursor()
+			cursor.execute(create_sql)
+
+	def save_chat(self, user_query: str, assistant_response: str):
+		"""Save a single chat exchange to the database."""
+		insert_sql = (
+			"INSERT INTO chat_history (user_query, assistant_response, created_at) VALUES (?, ?, ?)"
+		)
+		now = datetime.utcnow()
+		with self._get_connection() as conn:
+			cursor = conn.cursor()
+			cursor.execute(insert_sql, (user_query, assistant_response, now))
+
+	def get_history(self, limit: int = 100):
+		"""Retrieve the most recent chat history entries."""
+		select_sql = "SELECT TOP (?) id, user_query, assistant_response, created_at FROM chat_history ORDER BY created_at DESC"
+		with self._get_connection() as conn:
+			cursor = conn.cursor()
+			cursor.execute(select_sql, (limit,))
+			rows = cursor.fetchall()
+		return [
+			{
+				"id": row[0],
+				"user_query": row[1],
+				"assistant_response": row[2],
+				"created_at": row[3],
+			}
+			for row in rows
+		]

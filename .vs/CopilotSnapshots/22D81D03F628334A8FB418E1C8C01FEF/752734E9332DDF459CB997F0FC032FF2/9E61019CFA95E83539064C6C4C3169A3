@@ -1,0 +1,10 @@
+﻿# Environment configuration for the Public Administration Virtual Assistant
+# Replace the placeholder values with your secure settings before running.
+
+# SQL Server connection string example (ODBC):
+# DRIVER={ODBC Driver 17 for SQL Server};SERVER=your_server;DATABASE=your_db;UID=your_user;PWD=your_password
+DATABASE_CONN_STRING=
+
+# Ollama / local LLM endpoint (if used)
+# OLLAMA_URL=http://localhost:11434
+# OLLAMA_MODEL=your-model-name

@@ -1,0 +1,7 @@
+﻿streamlit
+langchain
+faiss-cpu
+rank_bm25
+pdfplumber
+pyodbc
+python-dotenv
